@@ -1,14 +1,11 @@
 Piece[] pieces = new Piece[16];
-int taken_i;
-boolean moving;
-
-int []stages = {1,2,3};
-int current_stage;
+int taken_i, d;
+boolean player_1, place,choose;
+
 boolean [][] taken = new boolean[4][4];
-int [][] board = new int[4][4];
+boolean [][] board = new boolean[4][4];
 PVector [][] b_coord = new PVector[4][4];
-
-int d;
+
 
 void setup()
 {
@@ -18,7 +15,11 @@ void setup()
   rectMode(CENTER);
   
   d = 72;
-  moving = false;
+  player_1 = true;
+  place = false;
+  choose = true;
+  taken_i = -1;
+  
   String []forms = {"hollow","solid" };
   String []colors = {"light","dark"};
   String []heights = {"short","tall" };
@@ -29,9 +30,8 @@ void setup()
         {
           b_coord[i][j] = new PVector(width/3-1.5*d+i*d, height/2-1.5*d+j*d);
           pieces[i*4 + j] = new Piece(2*width/3+int(i*d*0.8), height/3+int(j*d*0.8), shapes[(i*4 + j)/8], colors[(i*4 + j)%2], heights[((i*4 + j)/4)%2], forms[(i + j*4)/8],i*4 + j);
-          board[i][j] = -1;
-        } 
-    current_stage = 0;  
+          board[i][j] = true;
+        }  
 }
 
 void draw()
@@ -39,25 +39,11 @@ void draw()
   //cursor(ARROW);
   background(0);
   
-  
   drawBoard();
+  nextMove();
   drawPieces();
-  //checkWinner();
-  //nextMove();
+  checkWinner();
   
-  if(mousePressed)
-   {
-      pieces[pieceTaken].X = mouseX;
-      pieces[pieceTaken].Y = mouseY;
-      strokeWeight(3);
-   }
-  /*
-  if...
-  if...
-  if...
-  if...
-  current_stage = (current_stage + 1) % 3;
-  */
 }
  
 void drawBoard()
@@ -91,14 +77,63 @@ void drawBoard()
 }
 
 void drawPieces()
+{ 
+  for(int i = 0; i < 16; i++)
+      pieces[i].show();
+}
+
+void checkWinner()
 {
-   
-  for(int i = 0; i < 16; i++)
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)     
+        {
+          fill(255,0,0);
+          if(board[i][j])      
+            text("QUARTO", width/2, height/2); 
+        } 
+  
+  
+  
+}
+
+void nextMove()
+{
+  if(place && mousePressed) 
   {
-      pieces[i].isChosen();
-      if(pieces[i].chosen)
-        taken_i = i;
-      pieces[i].show();
+    pieces[taken_i].X = mouseX;
+    pieces[taken_i].Y = mouseY;
   }
+  
+  if(choose)
+  {
+    taken_i = -1;
+    for(int i = 0; i < 16; i++)
+    {  
+      pieces[i].isChosen();
+       if(pieces[i].chosen)
+         taken_i = i;
+         
+    }
+    
+    if(taken_i != -1)
+    {
+        pieces[taken_i].X = 2*width/3;
+        pieces[taken_i].Y = (player_1)? height - 50: 50;
+        player_1 = !player_1;
+        
+    }
+  }
+  
+  if(place)
+  {
+    choose = true;
+    place = false;
+  }
+  else if(choose && taken_i != -1)
+  {
+    place = true;
+    choose = false;
+  }
+  
   
 }

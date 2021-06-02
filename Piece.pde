@@ -56,5 +56,7 @@ class Piece
   {
     if (mousePressed && dist(mouseX, mouseY, X, Y) < d/2)
       chosen = true;
+    else 
+      chosen = false;
   }
 }

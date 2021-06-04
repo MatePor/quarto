@@ -1,6 +1,6 @@
 Piece[] pieces = new Piece[16];
 int taken_i, d;
-boolean player_1, place,choose;
+boolean player_1, place, done, choose, claim_win, to_release;
 
 boolean [][] taken = new boolean[4][4];
 boolean [][] board = new boolean[4][4];
@@ -17,7 +17,10 @@ void setup()
   d = 72;
   player_1 = true;
   place = false;
+  done = false;
   choose = true;
+  claim_win = false;
+  to_release = false;
   taken_i = -1;
   
   String []forms = {"hollow","solid" };
@@ -88,7 +91,7 @@ void checkWinner()
     for(int j = 0; j < 4; j++)     
         {
           fill(255,0,0);
-          if(board[i][j])      
+          if(board[i][j] && claim_win)      
             text("QUARTO", width/2, height/2); 
         } 
   
@@ -96,13 +99,26 @@ void checkWinner()
   
 }
 
-void nextMove()
+void mouseReleased()
 {
-  if(place && mousePressed) 
+  if(place && to_release && done) 
   {
     pieces[taken_i].X = mouseX;
     pieces[taken_i].Y = mouseY;
+    
+    taken_i = -1;
+    done = false;
+    place = false;
+    choose = true;
+    to_release = false;
   }
+
+}
+
+void nextMove()
+{
+  if(place && mousePressed && !to_release)
+    to_release = true;
   
   if(choose)
   {
@@ -115,21 +131,17 @@ void nextMove()
          
     }
     
-    if(taken_i != -1)
+    if(taken_i != -1 && !done)
     {
         pieces[taken_i].X = 2*width/3;
         pieces[taken_i].Y = (player_1)? height - 50: 50;
         player_1 = !player_1;
-        
+        done = true;
     }
   }
   
-  if(place)
-  {
-    choose = true;
-    place = false;
-  }
-  else if(choose && taken_i != -1)
+
+  if(choose && taken_i != -1 && !to_release)
   {
     place = true;
     choose = false;

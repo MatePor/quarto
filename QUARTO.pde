@@ -1,11 +1,11 @@
-Piece[] pieces = new Piece[16];
 int taken_i, d;
-boolean player_1, place, done, choose, claim_win, to_release;
-
-boolean [][] taken = new boolean[4][4];
-boolean [][] board = new boolean[4][4];
-PVector [][] b_coord = new PVector[4][4];
-
+boolean player_1, place, choose, claim_win, 
+game_finished, m_menu;
+
+Piece[] pieces;
+PVector [][] b_coord;
+String [][]board_state;  
+Button START_B, CLAIM_B, MENU_B;
 
 void setup()
 {
@@ -14,39 +14,73 @@ void setup()
   //surface.setResizable(true); 
   rectMode(CENTER);
   
+  START_B = new Button(width/2, height/2, 320, 140, "START");
+  CLAIM_B = new Button(width - 25, height/2, 50 , 200, "C");
+  MENU_B = new Button(80, 80, 60, 60, "M");
+  //START = new Button(width/2, height/2, 320, 140, "START");
+  //START = new Button(width/2, height/2, 320, 140, "START");
+  
   d = 72;
-  player_1 = true;
-  place = false;
-  done = false;
-  choose = true;
-  claim_win = false;
-  to_release = false;
   taken_i = -1;
   
-  String []forms = {"hollow","solid" };
-  String []colors = {"light","dark"};
-  String []heights = {"short","tall" };
-  String []shapes = {"square","circle"};
-  
+  b_coord = new PVector[4][4];
+  board_state = new String[4][4];
+  pieces = new Piece[16];
   for(int i = 0; i < 4; i++)
     for(int j = 0; j < 4; j++)     
-        {
-          b_coord[i][j] = new PVector(width/3-1.5*d+i*d, height/2-1.5*d+j*d);
-          pieces[i*4 + j] = new Piece(2*width/3+int(i*d*0.8), height/3+int(j*d*0.8), shapes[(i*4 + j)/8], colors[(i*4 + j)%2], heights[((i*4 + j)/4)%2], forms[(i + j*4)/8],i*4 + j);
-          board[i][j] = true;
-        }  
+      {
+        b_coord[i][j] = new PVector(width/3-1.5*d+i*d, height/2-1.5*d+j*d);
+        pieces[i*4 + j] = new Piece(2*width/3+int(i*d*0.8), height/3+int(j*d*0.8), i*4 + j);
+        board_state[i][j] = "----";
+      }  
+  
+  player_1 = true;
+  place = false;
+  choose = true;
+  claim_win = true;
+  game_finished = false;
+  m_menu = true;
 }
 
 void draw()
-{
-  //cursor(ARROW);
+{
   background(0);
   
-  drawBoard();
-  nextMove();
-  drawPieces();
-  checkWinner();
-  
+  controls();
+  if(m_menu)
+  {
+    pushStyle();
+    stroke(255,0,0);
+    strokeWeight(20);
+    fill(45);
+    rect(width/2, height/2, width-50, height-50);
+    popStyle();
+    fill(255);
+    textSize(50);
+    text("QUARTO", width/2, 150);
+    START_B.show();
+    
+  }
+  else
+  {
+    drawBoard();
+    drawPieces();
+    MENU_B.show();
+    CLAIM_B.show();
+    
+    if(!game_finished)
+    {
+      nextMove();
+      if(claim_win)
+        game_finished = checkWinner();
+    }
+    else 
+    {
+       textSize(30);
+       fill(255);
+       text("QUARTO", width/2, height/2);    
+    } 
+  }
 }
  
 void drawBoard()
@@ -85,67 +119,144 @@ void drawPieces()
       pieces[i].show();
 }
 
-void checkWinner()
-{
-  for(int i = 0; i < 4; i++)
-    for(int j = 0; j < 4; j++)     
-        {
-          fill(255,0,0);
-          if(board[i][j] && claim_win)      
-            text("QUARTO", width/2, height/2); 
-        } 
+boolean checkWinner()
+{ 
+
+ // 4 letters to check
+ for(int i = 0; i < 4; i++)
+ {
+   boolean eq_diag1, eq_diag2;
+   char comp_0 = board_state[0][0].charAt(i);
+   char comp_1 = board_state[0][3].charAt(i);
+   eq_diag1 = true;
+   eq_diag2 = true;
+   
+   // 4 rows and columns
+   for(int j = 0; j < 4; j++)
+   {  
+      boolean all_equal = true;
+      char comp_2 = board_state[j][j].charAt(i);
+      
+      if(board_state[j][3-j].charAt(i) != comp_1 || 
+      board_state[j][3-j].charAt(i) == '-')
+        eq_diag1 = false;
+      if(comp_2 != comp_0 || comp_2 == '-')
+        eq_diag2 = false;
+        
+      for(int k = 0; k < 4; k++) 
+        if(board_state[j][k].charAt(i) != comp_2 || 
+        board_state[j][k].charAt(i) == '-')
+           all_equal = false;
+           
+      if(all_equal)
+        return true;
+      
+      all_equal = true;   
+      for(int k = 0; k < 4; k++) 
+        if(board_state[k][j].charAt(i) != comp_2 || 
+        board_state[k][j].charAt(i) == '-')
+           all_equal = false;
+       
+      if(all_equal)
+        return true;            
+    }
+    
+    if(eq_diag1)
+      return true;
+    if(eq_diag2)
+      return true;
+  }
   
-  
-  
+  return false;
 }
 
 void mouseReleased()
 {
-  if(place && to_release && done) 
+  if(m_menu && START_B.pressed)
+     m_menu = false;
+  
+  if(!m_menu && MENU_B.pressed)
+     m_menu = true;
+     
+  if(!m_menu && CLAIM_B.pressed)
+     claim_win = !claim_win;
+  
+  if(taken_i != -1 && choose)
   {
-    pieces[taken_i].X = mouseX;
-    pieces[taken_i].Y = mouseY;
-    
+      pieces[taken_i].X = 2*width/3;
+      pieces[taken_i].Y = (player_1)? height - 50: 50;
+      player_1 = !player_1;
+      choose = false;
+  } 
+  else
+  if(!place && taken_i != -1)
+      place = true;
+  else if(place && dist(mouseX, mouseY, width/3, height/2) < 5.5*d/2)
+  {
+    PVector mouse_c = new PVector(mouseX, mouseY);
+    PVector ind = findNearest(mouse_c);
+    pieces[taken_i].X = int(b_coord[int(ind.x)][int(ind.y)].x);
+    pieces[taken_i].Y = int(b_coord[int(ind.x)][int(ind.y)].y);
+    pieces[taken_i].placed = true;
+    board_state[int(ind.x)][int(ind.y)] = pieces[taken_i].info_ID;
+     
     taken_i = -1;
-    done = false;
     place = false;
     choose = true;
-    to_release = false;
   }
 
 }
 
 void nextMove()
 {
-  if(place && mousePressed && !to_release)
-    to_release = true;
-  
   if(choose)
   {
-    taken_i = -1;
     for(int i = 0; i < 16; i++)
     {  
       pieces[i].isChosen();
-       if(pieces[i].chosen)
-         taken_i = i;
-         
-    }
-    
-    if(taken_i != -1 && !done)
-    {
-        pieces[taken_i].X = 2*width/3;
-        pieces[taken_i].Y = (player_1)? height - 50: 50;
-        player_1 = !player_1;
-        done = true;
+       if(pieces[i].chosen && !pieces[i].placed)
+         taken_i = i;        
     }
   }
-  
+}
 
-  if(choose && taken_i != -1 && !to_release)
-  {
-    place = true;
-    choose = false;
-  }
+void controls()
+{
   
+}
+
+PVector findNearest(PVector point)
+{
+  float minDist = 1000;
+  PVector retVec = new PVector(0,0);
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)     
+      {
+        float dis = dist(b_coord[i][j].x,b_coord[i][j].y, point.x, point.y);
+        if(dis < minDist && (board_state[i][j] == "----"))
+        {
+          minDist = dis;
+          retVec.x = i;   
+          retVec.y = j;    
+        }
+      }
   
+   return retVec;
+}
+
+void resetAll()
+{
+  player_1 = true;
+  place = false;
+  choose = true;
+  claim_win = false;
+  taken_i = -1;
+  
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)     
+        {
+          b_coord[i][j] = new PVector(width/3-1.5*d+i*d, height/2-1.5*d+j*d);
+          pieces[i*4 + j] = new Piece(2*width/3+int(i*d*0.8), height/3+int(j*d*0.8), i*4 + j);
+          board_state[i][j] = "----";
+        }  
 }

@@ -1,28 +1,25 @@
 class Piece
 {
 
-  int X, Y, d; // coordinates and diameter
-  String shape_type; // square/circle
-  String color_type; // light/dark
-  String height_type; // tall/short
-  String form_type; // solid/hollow
-
+  int X, Y, d; // coordinates and diameter 
+  String info_ID; 
+  //  "BBBB" B = (0/1):
+  // - light/dark 
+  // - square/circle
+  // - solid/hollow
+  // - short/tall
+  // e.g. "0101" - light, circle, solid, tall
   boolean chosen, placed;
-  int ID;
-
-  Piece(int pX, int pY, String shape, String colour, String height_, String form, int id_)
+ 
+  Piece(int pX, int pY, int id)
   {
-    ID = id_;
+    info_ID = binary(id, 4);
     X = pX;
     Y = pY;
     chosen = false;
     placed = false;
-    shape_type = shape; 
-    color_type = colour; 
-    height_type = height_; 
-    form_type = form;  
 
-    if (height_type == "tall")
+    if (info_ID.charAt(3) == '1')
       d = 48;
     else 
       d = 36;
@@ -35,17 +32,17 @@ class Piece
     else
       stroke(0); 
        
-    if (color_type == "dark")
+    if (info_ID.charAt(0) == '1')
       fill(110);
     else 
       fill(215);
 
-    if (shape_type == "circle")
+    if (info_ID.charAt(1) == '1')
       ellipse(X, Y, d, d);
     else 
       rect(X, Y, d, d);
 
-    if (form_type == "hollow")
+    if (info_ID.charAt(2) == '1')
     {
       fill(0);
       ellipse(X, Y, 22, 22);

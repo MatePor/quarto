@@ -5,7 +5,7 @@ game_finished, m_menu;
 Piece[] pieces;
 PVector [][] b_coord;
 String [][]board_state;  
-Button START_B, CLAIM_B, MENU_B;
+Button START_B, CLAIM_B, MENU_B, RESET_B;
 
 void setup()
 {
@@ -15,9 +15,9 @@ void setup()
   rectMode(CENTER);
   
   START_B = new Button(width/2, height/2, 320, 140, "START");
+  RESET_B = new Button(width/2, height/2+160, 320, 140, "RESET");
   CLAIM_B = new Button(width - 25, height/2, 50 , 200, "C");
   MENU_B = new Button(80, 80, 60, 60, "M");
-  //START = new Button(width/2, height/2, 320, 140, "START");
   //START = new Button(width/2, height/2, 320, 140, "START");
   
   d = 72;
@@ -59,7 +59,7 @@ void draw()
     textSize(50);
     text("QUARTO", width/2, 150);
     START_B.show();
-    
+    RESET_B.show();
   }
   else
   {
@@ -68,6 +68,11 @@ void draw()
     MENU_B.show();
     CLAIM_B.show();
     
+    pushStyle();
+    fill(100,250,0);
+    ellipse(width-64, (player_1)? 64: height - 64, 40,40);
+    popStyle();
+  
     if(!game_finished)
     {
       nextMove();
@@ -172,15 +177,28 @@ boolean checkWinner()
 
 void mouseReleased()
 {
-  if(m_menu && START_B.pressed)
-     m_menu = false;
-  
-  if(!m_menu && MENU_B.pressed)
-     m_menu = true;
-     
-  if(!m_menu && CLAIM_B.pressed)
-     claim_win = !claim_win;
-  
+  if(m_menu)
+  {
+    if(START_B.pressed)
+    {
+       m_menu = false;
+       START_B.pressed = false;
+    }
+    
+    if(RESET_B.pressed)
+       resetAll();     
+  }
+  else
+  {
+    if(MENU_B.pressed)
+    {
+       m_menu = true;
+       MENU_B.pressed = false;
+    }
+       
+    if(CLAIM_B.pressed)
+       claim_win = !claim_win;
+  }
   if(taken_i != -1 && choose)
   {
       pieces[taken_i].X = 2*width/3;

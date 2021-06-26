@@ -16,7 +16,7 @@ void setup()
   
   START_B = new Button(width/2, height/2, 320, 140, "START");
   RESET_B = new Button(width/2, height/2+160, 320, 140, "RESET");
-  CLAIM_B = new Button(width - 25, height/2, 50 , 200, "C");
+  CLAIM_B = new Button(width - 110, 80, 120, 60, "CLAIM WIN");
   MENU_B = new Button(80, 80, 60, 60, "M");
   //START = new Button(width/2, height/2, 320, 140, "START");
   
@@ -37,7 +37,7 @@ void setup()
   player_1 = true;
   place = false;
   choose = true;
-  claim_win = true;
+  claim_win = false;
   game_finished = false;
   m_menu = true;
 }
@@ -55,6 +55,7 @@ void draw()
     fill(45);
     rect(width/2, height/2, width-50, height-50);
     popStyle();
+
     fill(255);
     textSize(50);
     text("QUARTO", width/2, 150);
@@ -63,6 +64,8 @@ void draw()
   }
   else
   {
+    CLAIM_B.y = (player_1)? 80: height - 80;
+    
     drawBoard();
     drawPieces();
     MENU_B.show();
@@ -70,7 +73,17 @@ void draw()
     
     pushStyle();
     fill(100,250,0);
-    ellipse(width-64, (player_1)? 64: height - 64, 40,40);
+    ellipse(width-355, (player_1)? 80: height - 80, 25, 25);
+    if(claim_win && player_1)
+        fill(100,250,0);
+    else 
+        fill(160);
+    ellipse(width-185, 80, 25, 25);
+    if(claim_win && !player_1)
+        fill(100,250,0);
+    else 
+        fill(160);
+    ellipse(width-185, height - 80, 25, 25);
     popStyle();
   
     if(!game_finished)
@@ -95,19 +108,19 @@ void drawBoard()
   fill(45);
   strokeWeight(10);
   rect(width/2, height/2, width-60, height-60);
-  popStyle();
-  
+  stroke(0);
+  strokeWeight(1); 
   fill(255,0,0);
   ellipse(width/3, height/2, 5.75*d, 5.75*d);
   fill(0);
-  ellipse(width/3, height/2, 5.5*d, 5.5*d);
-  
-  pushStyle();
+  ellipse(width/3, height/2, 5.5*d, 5.5*d); 
   fill(220);
-  stroke(0);
   strokeWeight(2);
   ellipse(2*width/3, 0, 200, 200);
   ellipse(2*width/3, height, 200, 200);
+  fill(120);
+  rect(width - 110, 80, 120, 60);
+  rect(width - 110, height - 80, 120, 60);
   popStyle();
     
   fill(255);
@@ -205,6 +218,7 @@ void mouseReleased()
       pieces[taken_i].Y = (player_1)? height - 50: 50;
       player_1 = !player_1;
       choose = false;
+      claim_win = false;
   } 
   else
   if(!place && taken_i != -1)
@@ -268,6 +282,7 @@ void resetAll()
   place = false;
   choose = true;
   claim_win = false;
+  game_finished = false;
   taken_i = -1;
   
   for(int i = 0; i < 4; i++)

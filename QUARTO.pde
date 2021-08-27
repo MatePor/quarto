@@ -7,7 +7,7 @@ Piece[] pieces;
 PVector [][] b_coord;
 String [][]board_state;
   
-Button START_B, CLAIM_B, MENU_B, RESET_B, I_START,
+Button START_B, CLAIM_B, MENU_B, RESET_B, I_START, CLOSE_B,
 LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4, LEVEL_5;
 
 String []message = {"good job!", "nice, keep it up!", "you rock!", "you're killing it!", "..."};
@@ -32,6 +32,7 @@ void setup()
   LEVEL_5 = new Button(width/2, height/4 + 360, 320, 80, "LEVEL 5");
   
   I_START = new Button(width/6, height/4, 180, 80, "Do I start?");
+  CLOSE_B = new Button(width/6, height/4, 20, 20, "X");
   
   d = 72;
   taken_i = -1;
@@ -159,7 +160,7 @@ void mouseReleased()
     if(taken_i != -1 && choose)
     {
         pieces[taken_i].X = 2*width/3;
-        pieces[taken_i].Y = (human_first)? 50: height - 50;  
+        pieces[taken_i].Y = 50;  
         
         player_1 = !player_1;
         choose = false;
@@ -340,19 +341,18 @@ void gamePlay()
     ellipse(width-185, height - 80, 25, 25);
     popStyle();
     */
-    
+    if(claim_win)
+      game_finished = checkWinner();
+        
     if(!game_finished)
     {
       nextMove();
-      if(claim_win)
-        game_finished = checkWinner();
-        
       if(player_1 ^ human_first)
         botMove();
     }
     else 
     {
-       fill(255);
+       fill(255, 200);
        rect(width/2, height/2, 300,500);
        textSize(40);
        fill(255,0,0);
@@ -391,6 +391,7 @@ void resetAll()
   game_finished = false;
   ch_difficulty = true;
   taken_i = -1;
+  human_first = false;
   
   difficulty_lvl = 0;
   
@@ -462,7 +463,7 @@ void botMove()
   if(taken_i != -1 && choose)
   {
       pieces[taken_i].X = 2*width/3;
-      pieces[taken_i].Y = (human_first)? height - 50: 50;
+      pieces[taken_i].Y = height - 50;
       
       player_1 = !player_1;
       choose = false;

@@ -90,7 +90,6 @@ void draw()
 
 void mouseDragged()
 {
-  cursor(MOVE);
   if(place && taken_i != -1)
    {
      pieces[taken_i].X =  mouseX;
@@ -107,7 +106,6 @@ void mouseDragged()
 
 void mouseReleased()
 {
-  cursor(ARROW);
   if(m_menu)
   {
     if(START_B.pressed)
@@ -161,7 +159,7 @@ void mouseReleased()
     if(taken_i != -1 && choose)
     {
         pieces[taken_i].X = 2*width/3;
-        pieces[taken_i].Y = (human_first)? 50 : height - 50;  
+        pieces[taken_i].Y = (human_first)? 50: height - 50;  
         
         player_1 = !player_1;
         choose = false;
@@ -464,7 +462,7 @@ void botMove()
   if(taken_i != -1 && choose)
   {
       pieces[taken_i].X = 2*width/3;
-      pieces[taken_i].Y = (human_first)? 50: height - 50;
+      pieces[taken_i].Y = (human_first)? height - 50: 50;
       
       player_1 = !player_1;
       choose = false;

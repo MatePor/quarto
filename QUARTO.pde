@@ -1,4 +1,4 @@
-int taken_i, d, difficulty_lvl;
+int taken_i, d, difficulty_lvl, move_count;
 boolean player_1, place, choose, claim_win, human_first,
 game_finished, m_menu, ch_difficulty;
 
@@ -37,6 +37,7 @@ void setup()
   d = 72;
   taken_i = -1;
   difficulty_lvl = 0;
+  move_count = 0;
   
   b_coord = new PVector[4][4];
   board_state = new String[4][4];
@@ -176,6 +177,7 @@ void mouseReleased()
       pieces[taken_i].X = int(b_coord[int(ind.x)][int(ind.y)].x);
       pieces[taken_i].Y = int(b_coord[int(ind.x)][int(ind.y)].y);
       pieces[taken_i].placed = true;
+      move_count++;
       board_state[int(ind.x)][int(ind.y)] = pieces[taken_i].info_ID;
        
       taken_i = -1;
@@ -343,7 +345,9 @@ void gamePlay()
     */
     if(claim_win)
       game_finished = checkWinner();
-        
+    if(move_count == 16)
+      game_finished = true;
+      
     if(!game_finished)
     {
       nextMove();
@@ -356,10 +360,16 @@ void gamePlay()
        rect(width/2, height/2, 300,500);
        textSize(40);
        fill(255,0,0);
+       if(move_count < 16)
+       {
        if(player_1 ^ human_first)
          text("QUARTO! \nYou lose!", width/2, height/2); 
        else
          text("QUARTO! \nYou win! \n" + message[difficulty_lvl - 1], width/2, height/2);
+       }
+       else  
+         text(".DRAW.", width/2, height/2); 
+         
     } 
 }
 
@@ -392,6 +402,7 @@ void resetAll()
   ch_difficulty = true;
   taken_i = -1;
   human_first = false;
+  move_count = 0;
   
   difficulty_lvl = 0;
   
@@ -496,6 +507,7 @@ void botMove()
     pieces[taken_i].X = int(b_coord[int(ind.x)][int(ind.y)].x);
     pieces[taken_i].Y = int(b_coord[int(ind.x)][int(ind.y)].y);
     pieces[taken_i].placed = true;
+    move_count++;
     board_state[int(ind.x)][int(ind.y)] = pieces[taken_i].info_ID;
      
     taken_i = -1;

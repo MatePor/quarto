@@ -25,16 +25,19 @@ class Button
       
     if (pressed) 
     {  
-      strokeWeight(4);
+      strokeWeight(5);
       fill(90, 180);
     } 
     else
     {  
       strokeWeight(2);
-      fill(180, 180);
+      fill(200,120,40, 180);
     }
     
     rect(x, y, w, h); 
+    
+    fill(180, 180);
+    rect(x, y, w - h/5, h - h/5);
 
     if (h != 0)
     {

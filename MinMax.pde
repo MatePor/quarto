@@ -1,6 +1,5 @@
 class MinMax
 {
-  
   MinMax()
   {
     
@@ -9,6 +8,4 @@ class MinMax
   }
   
   
-  
- 
 }

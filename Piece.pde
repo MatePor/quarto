@@ -1,6 +1,5 @@
 class Piece
 {
-
   int X, Y, d; // coordinates and diameter 
   String info_ID; 
   //  "BBBB" B = (0/1):

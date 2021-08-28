@@ -1,5 +1,5 @@
 int taken_i, d, difficulty_lvl, move_count;
-boolean player_1, place, choose, claim_win, human_first,
+boolean player_1, place, choose, claim_win, human_first, animation_enabled,
 game_finished, m_menu, ch_difficulty;
 
 Piece[] pieces;
@@ -11,6 +11,15 @@ Button START_B, CLAIM_B, MENU_B, RESET_B, I_START, CLOSE_B,
 LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4, LEVEL_5;
 
 String []message = {"good job!", "nice, keep it up!", "you rock!", "you're killing it!", "..."};
+String []informations = {"Piece placement and piece choice are completely random. "+
+  "Winning against it should be pretty efortless",  
+  "Piece placement is random but engine won't give you any piece that allows you to win immediately."
+  + "You have to make your win inevitable",
+  "Engine sees winning moves for both sides." +
+  "It will always find a winning move if there is one." +
+  "You will need to think ahead to win",
+  "Some minmax I guess",
+  "Neural network probably..."};
 
 void setup()
 {
@@ -58,8 +67,8 @@ void setup()
   m_menu = true;
   ch_difficulty = true;
   human_first = false;
+  animation_enabled = false;
 }
-
 
 void draw()
 {
@@ -141,8 +150,13 @@ void mouseReleased()
       if(I_START.pressed)
         human_first = !human_first;
         
-      if(difficulty_lvl == 1)    // now it works only on the 1st difficulty
+      if(difficulty_lvl < 4 && difficulty_lvl != 0)    // now it works only for 1st and 2nd lvl
         ch_difficulty = false;  
+        
+      if(difficulty_lvl != 0)
+        START_B.title = "CONTINUE";
+      else
+        START_B.title = "START";
     }
     
     
@@ -225,93 +239,110 @@ void drawPieces()
       pieces[i].show();
 }
 
-boolean checkWinner()
-{ 
-
- // 4 letters to check
- for(int i = 0; i < 4; i++)
- {
-   boolean eq_diag1, eq_diag2;
-   char comp_0 = board_state[0][0].charAt(i);
-   char comp_1 = board_state[0][3].charAt(i);
-   eq_diag1 = true;
-   eq_diag2 = true;
-   
-   // 4 rows and columns
-   for(int j = 0; j < 4; j++)
-   {  
-      boolean all_equal = true;
-      char comp_2 = board_state[j][j].charAt(i);
-      
-      if(board_state[j][3-j].charAt(i) != comp_1 || 
-      board_state[j][3-j].charAt(i) == '-')
-        eq_diag1 = false;
-      if(comp_2 != comp_0 || comp_2 == '-')
-        eq_diag2 = false;
-        
-      for(int k = 0; k < 4; k++) 
-        if(board_state[j][k].charAt(i) != comp_2 || 
-        board_state[j][k].charAt(i) == '-')
-           all_equal = false;
-           
-      if(all_equal)
-        return true;
-      
-      all_equal = true;   
-      for(int k = 0; k < 4; k++) 
-        if(board_state[k][j].charAt(i) != comp_2 || 
-        board_state[k][j].charAt(i) == '-')
-           all_equal = false;
-       
-      if(all_equal)
-        return true;            
-    }
+void chooseDifficulty()
+{
+    pushStyle();
+    stroke(255,0,0);
+    strokeWeight(20);
+    fill(45);
+    rect(width/2, height/2, width-50, height-50);
+    popStyle();
     
-    if(eq_diag1)
-      return true;
-    if(eq_diag2)
-      return true;
-  }
-  
-  return false;
+    pushStyle();
+    fill(255);
+    textSize(40);
+    text("choose difficulty!", width/2, 85);
+ 
+    I_START.show();
+    LEVEL_1.show();
+    LEVEL_2.show();
+    LEVEL_3.show();
+    LEVEL_4.show();
+    LEVEL_5.show();
+    
+    if(human_first)
+    {
+      fill(0,255,0);
+      textSize(25);
+      text("Yes. ", 130,  height/4 + 90, 80, 30);
+      fill(0,255,0);
+    }
+    else
+    {
+      fill(255,0,0);
+      textSize(25);
+      text("No. ", 130,  height/4 + 90, 80, 30);
+      fill(60);
+    }
+   
+    ellipse(70,  height/4 + 90, 30, 30);
+    fill(255);
+    text("TO DO! some more settings here: ", width/6, 2*height/3, 180,100);
+    popStyle(); 
+    
+    pushStyle();
+    textAlign(LEFT);
+    textSize(15);
+    text("EASY", width/2 + 320, height/4, 300, 40);
+    text("MEDIUM", width/2 + 320, height/4 + 90, 300, 40);
+    text("HARD [TO DO!]", width/2 + 320, height/4 + 180, 300, 40);
+    text("VERY HARD[TO DO!]", width/2 + 320, height/4 + 270, 300, 40);
+    text("IMPOSSIBLE [TO DO!]", width/2 + 320, height/4 + 360, 300, 40);
+    
+    for(int i = 0; i < 5; i++)
+    {
+      if(new PVector(width/2 + 320 - mouseX, height/4 + i*90 - mouseY).magSq() < 900)
+      {
+        stroke(0);
+        noFill();
+        strokeWeight(3);
+        ellipse(width/2 + 320, height/4 + i*90, 70, 70);
+        
+        fill(255,240);
+        rect(width/2, height/2, 500, 400);
+        fill(0);
+        textSize(30);
+        textAlign(LEFT);
+        text(informations[i], width/2, height/2, 450, 350);
+        
+      }
+      noFill();
+      stroke(255);
+      strokeWeight(8);
+      ellipse(width/2 + 320, height/4 + i*90, 60, 60);
+      fill(255);
+      noStroke();
+      rect(width/2 + 320, height/4 + i*90 + 6, 12, 24);
+      rect(width/2 + 320 - 2, height/4 + i*90, 12, 12);
+      ellipse(width/2 + 320, height/4 + i*90 - 14, 12, 12);
+    }
+
+    popStyle();
 }
 
-void nextMove()
+
+void resetAll()
 {
-  if(choose && (player_1 == human_first))
-  {
-    for(int i = 0; i < 16; i++)
-    {  
-      pieces[i].isChosen();
-       if(pieces[i].chosen && !pieces[i].placed)
-         taken_i = i;        
-    }
-  } else if(choose && (player_1 ^ human_first)) 
-  {
-    delay(500);
-    
-    switch(difficulty_lvl)
-    {
-      case 1:
-        while(taken_i == -1)
+  player_1 = true;
+  place = false;
+  choose = true;
+  claim_win = true; // change to false if you want to use CLAIM_B
+  game_finished = false;
+  ch_difficulty = true;
+  taken_i = -1;
+  human_first = false;
+  move_count = 0;
+  
+  difficulty_lvl = 0;
+  START_B.title = "START";
+  
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)     
         {
-          int i = int(random(0,15));
-          if(!pieces[i].placed)
-             taken_i = i;      
-        }
-        break;
-      case 2:
-        break;
-      case 3:
-        break;
-      case 4:
-        break;
-      case 5:
-        break;
-      default: break;
-    }
-    
-  }
+          b_coord[i][j] = new PVector(width/3-1.5*d+i*d, height/2-1.5*d+j*d);
+          pieces[i*4 + j] = new Piece(2*width/3+int(i*d*0.8), height/3+int(j*d*0.8), i*4 + j);
+          board_state[i][j] = "----";
+        }  
 }
 
 void gamePlay()
@@ -373,6 +404,100 @@ void gamePlay()
     } 
 }
 
+void nextMove()
+{
+  if(choose && (player_1 == human_first))
+  {
+    for(int i = 0; i < 16; i++)
+    {  
+      pieces[i].isChosen();
+       if(pieces[i].chosen && !pieces[i].placed)
+         taken_i = i;        
+    }
+  } else if(choose && (player_1 ^ human_first)) 
+  {
+    delay(500);
+    boolean piece_wins;
+    int count_iter;
+    int k;
+    
+    switch(difficulty_lvl)
+    {
+      case 1:
+        while(taken_i == -1)
+        {
+          int i = int(random(0,15));
+          if(!pieces[i].placed)
+             taken_i = i;      
+        }
+        break;
+      case 2:
+       /* piece_wins = true;
+        count_iter = 0;
+        k = -1;
+        while(piece_wins)
+        {
+          k = int(random(0,15));
+          
+          if(!pieces[k].placed)
+          {
+            count_iter++;
+            piece_wins = false;
+            for(int i = 0; i < 4; i++)
+              for(int j = 0; j < 4; j++)
+                 if(board_state[i][j] == "----")
+                 {
+                    board_state[i][j] = pieces[k].info_ID;
+                    if(checkWinner())  
+                       piece_wins = true;
+                    
+                    board_state[i][j] = "----";   
+                 }
+            if(count_iter > 50)
+              piece_wins = false;
+          }      
+        }      
+        if(k != -1)
+          taken_i = k; 
+        break; */
+      case 3:
+        piece_wins = true;
+        count_iter = 0;
+        k = -1;
+        while(piece_wins)
+        {
+          k = int(random(0,15));
+          
+          if(!pieces[k].placed)
+          {
+            count_iter++;
+            piece_wins = false;
+            for(int i = 0; i < 4; i++)
+              for(int j = 0; j < 4; j++)
+                 if(board_state[i][j] == "----")
+                 {
+                    board_state[i][j] = pieces[k].info_ID;
+                    if(checkWinner())  
+                       piece_wins = true;
+                    
+                    board_state[i][j] = "----";   
+                 }
+            if(count_iter > 50)
+              piece_wins = false;
+          }      
+        }      
+        if(k != -1)
+          taken_i = k; 
+        break;
+      case 4:
+        break;
+      case 5:
+        break;
+      default: break;
+    }  
+  }
+}
+
 PVector findNearest(PVector point)
 {
   float minDist = 1000;
@@ -392,81 +517,55 @@ PVector findNearest(PVector point)
    return retVec;
 }
 
-void resetAll()
-{
-  player_1 = true;
-  place = false;
-  choose = true;
-  claim_win = true; // change to false if you want to use CLAIM_B
-  game_finished = false;
-  ch_difficulty = true;
-  taken_i = -1;
-  human_first = false;
-  move_count = 0;
-  
-  difficulty_lvl = 0;
-  
-  for(int i = 0; i < 4; i++)
-    for(int j = 0; j < 4; j++)     
-        {
-          b_coord[i][j] = new PVector(width/3-1.5*d+i*d, height/2-1.5*d+j*d);
-          pieces[i*4 + j] = new Piece(2*width/3+int(i*d*0.8), height/3+int(j*d*0.8), i*4 + j);
-          board_state[i][j] = "----";
-        }  
-}
+boolean checkWinner()
+{ 
 
-void chooseDifficulty()
-{
-    pushStyle();
-    stroke(255,0,0);
-    strokeWeight(20);
-    fill(45);
-    rect(width/2, height/2, width-50, height-50);
-    popStyle();
-    
-    pushStyle();
-    fill(255);
-    textSize(40);
-    text("choose difficulty!", width/2, 85);
-
-    LEVEL_1.show();
-    LEVEL_2.show();
-    LEVEL_3.show();
-    LEVEL_4.show();
-    LEVEL_5.show();
-    
-    pushStyle();
-    textAlign(LEFT);
-    textSize(15);
-    text("Random moves", width/2 + 320, height/4, 300, 40);
-    text("Random [TO DO!]", width/2 + 320, height/4 + 90, 300, 40);
-    text("some alg [TO DO!]", width/2 + 320, height/4 + 180, 300, 40);
-    text("MinMax [TO DO!]", width/2 + 320, height/4 + 270, 300, 40);
-    text("Neural Network? [TO DO!]", width/2 + 320, height/4 + 360, 300, 40);
-    
-    text("TO DO! some more settings here: ", width/6, 2*height/3, 180,100);
-    popStyle();
-    
-    I_START.show();
-    
-    if(human_first)
-    {
-      fill(0,255,0);
-      textSize(25);
-      text("Yes. ", 130,  height/4 + 90, 80, 30);
-      fill(0,255,0);
-    }
-    else
-    {
-      fill(255,0,0);
-      textSize(25);
-      text("No. ", 130,  height/4 + 90, 80, 30);
-      fill(60);
+ // 4 letters to check
+ for(int i = 0; i < 4; i++)
+ {
+   boolean eq_diag1, eq_diag2;
+   char comp_0 = board_state[0][0].charAt(i);
+   char comp_1 = board_state[0][3].charAt(i);
+   eq_diag1 = true;
+   eq_diag2 = true;
+   
+   // 4 rows and columns
+   for(int j = 0; j < 4; j++)
+   {  
+      boolean all_equal = true;
+      char comp_2 = board_state[j][j].charAt(i);
+      
+      if(board_state[j][3-j].charAt(i) != comp_1 || 
+      board_state[j][3-j].charAt(i) == '-')
+        eq_diag1 = false;
+      if(comp_2 != comp_0 || comp_2 == '-')
+        eq_diag2 = false;
+        
+      for(int k = 0; k < 4; k++) 
+        if(board_state[j][k].charAt(i) != comp_2 || 
+        board_state[j][k].charAt(i) == '-')
+           all_equal = false;
+           
+      if(all_equal)
+        return true;
+      
+      all_equal = true;   
+      for(int k = 0; k < 4; k++) 
+        if(board_state[k][j].charAt(i) != comp_2 || 
+        board_state[k][j].charAt(i) == '-')
+           all_equal = false;
+       
+      if(all_equal)
+        return true;            
     }
     
-    ellipse(70,  height/4 + 90, 30, 30);
-    popStyle();
-    
+    if(eq_diag1)
+      return true;
+    if(eq_diag2)
+      return true;
+  }
+  
+  return false;
 }
 
 void botMove()
@@ -493,8 +592,25 @@ void botMove()
         mouse_c.set(random(width), random(height));
         break;
       case 2:
+         mouse_c.set(random(width), random(height));
         break;
       case 3:
+        boolean can_win = false;
+        for(int i = 0; i < 4; i++)
+          for(int j = 0; j < 4; j++)
+             if(board_state[i][j] == "----")
+             {
+                board_state[i][j] = pieces[taken_i].info_ID;
+                if(checkWinner())  
+                {
+                  can_win = true;
+                  mouse_c.set(b_coord[i][j].x, b_coord[i][j].y);
+                }
+                
+                board_state[i][j] = "----";   
+             }
+        if(!can_win)
+          mouse_c.set(random(width), random(height));
         break;
       case 4:
         break;

@@ -18,8 +18,8 @@ String []informations = {"Piece placement and piece choice are completely random
   "Engine sees winning moves for both sides." +
   "It will always find a winning move if there is one." +
   "You will need to think ahead to win",
-  "Some minmax I guess",
-  "Neural network probably..."};
+  "Minmax with alpha-beta prunning. Should be almost impossible to beat.",
+  "Neural network for fun..."};
 
 void setup()
 {
@@ -283,11 +283,11 @@ void chooseDifficulty()
     pushStyle();
     textAlign(LEFT);
     textSize(15);
-    text("EASY", width/2 + 320, height/4, 300, 40);
-    text("MEDIUM", width/2 + 320, height/4 + 90, 300, 40);
-    text("HARD [TO DO!]", width/2 + 320, height/4 + 180, 300, 40);
-    text("VERY HARD[TO DO!]", width/2 + 320, height/4 + 270, 300, 40);
-    text("IMPOSSIBLE [TO DO!]", width/2 + 320, height/4 + 360, 300, 40);
+    text("VERY EASY", width/2 + 320, height/4, 300, 40);
+    text("EASY", width/2 + 320, height/4 + 90, 300, 40);
+    text("MEDIUM", width/2 + 320, height/4 + 180, 300, 40);
+    text("HARD\n[TO DO!]", width/2 + 320, height/4 + 270, 300, 80);
+    text("IMPOSSIBLE\n[TO DO!]", width/2 + 320, height/4 + 360, 300, 80);
     
     for(int i = 0; i < 5; i++)
     {
@@ -375,7 +375,7 @@ void gamePlay()
     popStyle();
     */
     if(claim_win)
-      game_finished = checkWinner();
+      game_finished = checkWinner(board_state);
     if(move_count == 16)
       game_finished = true;
       
@@ -432,7 +432,7 @@ void nextMove()
         }
         break;
       case 2:
-       /* piece_wins = true;
+        piece_wins = true;
         count_iter = 0;
         k = -1;
         while(piece_wins)
@@ -448,7 +448,7 @@ void nextMove()
                  if(board_state[i][j] == "----")
                  {
                     board_state[i][j] = pieces[k].info_ID;
-                    if(checkWinner())  
+                    if(checkWinner(board_state))  
                        piece_wins = true;
                     
                     board_state[i][j] = "----";   
@@ -459,7 +459,7 @@ void nextMove()
         }      
         if(k != -1)
           taken_i = k; 
-        break; */
+        break; 
       case 3:
         piece_wins = true;
         count_iter = 0;
@@ -477,7 +477,7 @@ void nextMove()
                  if(board_state[i][j] == "----")
                  {
                     board_state[i][j] = pieces[k].info_ID;
-                    if(checkWinner())  
+                    if(checkWinner(board_state))  
                        piece_wins = true;
                     
                     board_state[i][j] = "----";   
@@ -490,6 +490,7 @@ void nextMove()
           taken_i = k; 
         break;
       case 4:
+        // index was chosen in botMove() function
         break;
       case 5:
         break;
@@ -517,15 +518,14 @@ PVector findNearest(PVector point)
    return retVec;
 }
 
-boolean checkWinner()
+boolean checkWinner(String brd[][])
 { 
-
  // 4 letters to check
  for(int i = 0; i < 4; i++)
  {
    boolean eq_diag1, eq_diag2;
-   char comp_0 = board_state[0][0].charAt(i);
-   char comp_1 = board_state[0][3].charAt(i);
+   char comp_0 = brd[0][0].charAt(i);
+   char comp_1 = brd[0][3].charAt(i);
    eq_diag1 = true;
    eq_diag2 = true;
    
@@ -533,17 +533,17 @@ boolean checkWinner()
    for(int j = 0; j < 4; j++)
    {  
       boolean all_equal = true;
-      char comp_2 = board_state[j][j].charAt(i);
+      char comp_2 = brd[j][j].charAt(i);
       
-      if(board_state[j][3-j].charAt(i) != comp_1 || 
-      board_state[j][3-j].charAt(i) == '-')
+      if(brd[j][3-j].charAt(i) != comp_1 || 
+      brd[j][3-j].charAt(i) == '-')
         eq_diag1 = false;
       if(comp_2 != comp_0 || comp_2 == '-')
         eq_diag2 = false;
         
       for(int k = 0; k < 4; k++) 
-        if(board_state[j][k].charAt(i) != comp_2 || 
-        board_state[j][k].charAt(i) == '-')
+        if(brd[j][k].charAt(i) != comp_2 || 
+        brd[j][k].charAt(i) == '-')
            all_equal = false;
            
       if(all_equal)
@@ -551,8 +551,8 @@ boolean checkWinner()
       
       all_equal = true;   
       for(int k = 0; k < 4; k++) 
-        if(board_state[k][j].charAt(i) != comp_2 || 
-        board_state[k][j].charAt(i) == '-')
+        if(brd[k][j].charAt(i) != comp_2 || 
+        brd[k][j].charAt(i) == '-')
            all_equal = false;
        
       if(all_equal)
@@ -570,6 +570,8 @@ boolean checkWinner()
 
 void botMove()
 {
+  int chosen_piece_index = -1;
+  
   if(taken_i != -1 && choose)
   {
       pieces[taken_i].X = 2*width/3;
@@ -592,7 +594,7 @@ void botMove()
         mouse_c.set(random(width), random(height));
         break;
       case 2:
-         mouse_c.set(random(width), random(height));
+        mouse_c.set(random(width), random(height));
         break;
       case 3:
         boolean can_win = false;
@@ -601,7 +603,7 @@ void botMove()
              if(board_state[i][j] == "----")
              {
                 board_state[i][j] = pieces[taken_i].info_ID;
-                if(checkWinner())  
+                if(checkWinner(board_state))  
                 {
                   can_win = true;
                   mouse_c.set(b_coord[i][j].x, b_coord[i][j].y);
@@ -613,8 +615,47 @@ void botMove()
           mouse_c.set(random(width), random(height));
         break;
       case 4:
+        int best_score = -10000000;
+        int best_move = -1;
+        int score = 0;
+     
+       for(int i = 0; i < 4; i++)
+        for(int j = 0; j < 4; j++)
+        {
+          if(board_state[j][i] == "----")
+          {
+            board_state[j][i] = pieces[taken_i].info_ID;
+            
+            boolean all_taken = true;
+            for(int k = 0; k < 15; k++)
+            {
+              if(!pieces[k].placed)
+              {
+                all_taken = false;
+                score = minimax(board_state, 0, 0, -100000, 100000, false);
+                if(score > best_score)
+                {
+                   best_score = score;
+                   best_move = i*4 + j; 
+                   chosen_piece_index = k;
+                } 
+              }    
+            }
+            
+            if(all_taken)
+              chosen_piece_index = -1;
+              
+            board_state[j][i] = "----";
+          } 
+        }
+        
+        int i = best_move/4;
+        int j = best_move%4;
+        mouse_c.set(b_coord[i][j].x, b_coord[i][j].y);
+        
         break;
       case 5:
+        mouse_c.set(random(width), random(height));
         break;
       default: break;
     }
@@ -626,7 +667,11 @@ void botMove()
     move_count++;
     board_state[int(ind.x)][int(ind.y)] = pieces[taken_i].info_ID;
      
-    taken_i = -1;
+   
+    if(difficulty_lvl == 4)
+      taken_i = chosen_piece_index;
+    else
+       taken_i = -1;
     place = false;
     choose = true;
   }

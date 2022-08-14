@@ -1,3 +1,9 @@
+final int BIG_DIAMETER = 50;
+final int SMALL_DIAMTER = 34;
+final int HOLE_RADIUS = 21;
+final color LIGHT_COL = color(220);
+final color DARK_COL = color(110);
+
 class Piece
 {
   int X, Y, d; // coordinates and diameter 
@@ -19,9 +25,9 @@ class Piece
     placed = false;
 
     if (info_ID.charAt(3) == '1')
-      d = 48;
+      d = BIG_DIAMETER;
     else 
-      d = 36;
+      d = SMALL_DIAMTER;
   }
 
   void show()
@@ -32,9 +38,9 @@ class Piece
       stroke(0); 
        
     if (info_ID.charAt(0) == '1')
-      fill(110);
+      fill(DARK_COL);
     else 
-      fill(215);
+      fill(LIGHT_COL);
 
     if (info_ID.charAt(1) == '1')
       ellipse(X, Y, d, d);
@@ -44,7 +50,7 @@ class Piece
     if (info_ID.charAt(2) == '1')
     {
       fill(0);
-      ellipse(X, Y, 22, 22);
+      ellipse(X, Y, HOLE_RADIUS, HOLE_RADIUS);
     }
   }
 
